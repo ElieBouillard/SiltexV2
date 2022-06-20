@@ -26,6 +26,14 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform _target;
     [SerializeField] private Vector3 _offset;
 
+    [SerializeField] private float speed = 20f;
+    [SerializeField] private float lerpSpeed = 5f;
+    [SerializeField] private float screenBorderThickness = 10f;
+    [SerializeField] private Vector2 screenXLimits = Vector2.zero;
+    [SerializeField] private Vector2 screenZLimits = Vector2.zero;
+    
+    public bool _isLocked = false;
+
     private void Awake()
     {
         _instance = this;
@@ -34,7 +42,36 @@ public class CameraController : MonoBehaviour
     private void Update()
     {
         if (_target == null) return;
-        transform.position = _target.position + _offset;
+
+        Vector3 pos = transform.position;
+        
+        if (_isLocked)
+        {
+            pos = _target.position + _offset;
+        }
+        else
+        {
+            Vector2 cursorPosition = Input.mousePosition;
+
+            if (cursorPosition.y >= Screen.height - screenBorderThickness)
+            {
+                pos = transform.position + new Vector3(transform.forward.x, 0f, transform.forward.z) * speed;
+            }
+            else if (cursorPosition.y <= screenBorderThickness)
+            {
+                pos = transform.position - new Vector3(transform.forward.x, 0f, transform.forward.z * speed);
+            }
+            if (cursorPosition.x >= Screen.width - screenBorderThickness)
+            {
+                pos = transform.position + new Vector3(transform.right.x, 0f, transform.right.z) * speed;
+            }
+            else if (cursorPosition.x <= screenBorderThickness)
+            {
+                pos = transform.position - new Vector3(transform.right.x, 0f, transform.right.z) * speed;
+            }
+        } 
+        
+        transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * lerpSpeed); 
     }
     
     public void SetCameraTarget(Transform target)
