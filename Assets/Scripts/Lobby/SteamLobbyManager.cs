@@ -89,7 +89,7 @@ public class SteamLobbyManager : MonoBehaviour
         
     }
 
-    internal void LeaveLobby()
+    public void LeaveLobby()
     {
         SteamMatchmaking.LeaveLobby(lobbyId);
     }
