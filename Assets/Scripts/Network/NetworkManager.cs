@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using RiptideNetworking;
 using RiptideNetworking.Transports.SteamTransport;
 using RiptideNetworking.Utils;
+using Steamworks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using SteamClient = RiptideNetworking.Transports.SteamTransport.SteamClient;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -138,7 +141,6 @@ public class NetworkManager : MonoBehaviour
         if (_isRunningGame)
         {
             SceneManager.LoadScene("LobbyScene");
-            Destroy(this.gameObject);
         }
         else
         {
@@ -150,6 +152,10 @@ public class NetworkManager : MonoBehaviour
            Destroy(item.Value.gameObject); 
         }
         Players.Clear();
+
+        _isRunningGame = false;
+        
+        // if(UseSteam) SteamLobbyManager.Instance.LeaveLobby();
     }
 
     private void ClientOnConnectionFailed(object sender, EventArgs e)

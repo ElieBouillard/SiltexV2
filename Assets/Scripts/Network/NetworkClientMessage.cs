@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using RiptideNetworking;
+using Steamworks;
 using UnityEngine;
 
 public class NetworkClientMessage : MonoBehaviour
@@ -18,11 +19,12 @@ public class NetworkClientMessage : MonoBehaviour
         NetworkManager.Instance.Client.Send(message);
     }
 
-    public void SendOnMovement(Vector3 pos, float rotY)
+    public void SendOnMovement(Vector3 pos, float rotY, float speed)
     {
         Message message = Message.Create(MessageSendMode.unreliable, MessageId.movement);
         message.AddVector3(pos);
         message.AddFloat(rotY);
+        message.AddFloat(speed);
         NetworkManager.Instance.Client.Send(message);
     }
     #endregion
@@ -46,12 +48,13 @@ public class NetworkClientMessage : MonoBehaviour
         ushort playerId = message.GetUShort();
         Vector3 pos = message.GetVector3();
         float rotY = message.GetFloat();
+        float speed = message.GetFloat();
 
         foreach (var player in NetworkManager.Instance.Players)
         {
             if (player.Key == playerId)
             {
-                player.Value.GetComponent<PlayerClientMovementController>().Move(pos, rotY);
+                player.Value.GetComponent<PlayerClientMovementController>().Move(pos, rotY, speed);
             }
         }
     }

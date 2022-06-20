@@ -8,10 +8,12 @@ public class PlayerLocalMovementController : MonoBehaviour
 {
     [SerializeField] private LayerMask _floorMask;
     private NavMeshAgent _agent;
+    private Animator _animator;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _animator = GetComponentInChildren<Animator>();
     }
 
     private void Update()
@@ -28,6 +30,7 @@ public class PlayerLocalMovementController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        NetworkManager.Instance.ClientMessage.SendOnMovement(transform.position, transform.GetChild(0).rotation.eulerAngles.y);
+        if(NetworkManager.Instance == null) return;
+        NetworkManager.Instance.ClientMessage.SendOnMovement(transform.position, transform.GetChild(0).rotation.eulerAngles.y, _animator.GetFloat("Speed"));
     }
 }
