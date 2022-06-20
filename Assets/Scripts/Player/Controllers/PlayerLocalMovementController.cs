@@ -7,6 +7,7 @@ using UnityEngine.AI;
 public class PlayerLocalMovementController : MonoBehaviour
 {
     [SerializeField] private LayerMask _floorMask;
+    [SerializeField] private ParticleSystem _moveClickFx;
     private NavMeshAgent _agent;
     private Animator _animator;
 
@@ -14,6 +15,7 @@ public class PlayerLocalMovementController : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponentInChildren<Animator>();
+        _moveClickFx.transform.parent = null;
     }
 
     private void Update()
@@ -24,6 +26,9 @@ public class PlayerLocalMovementController : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _floorMask))
             {
                 _agent.SetDestination(hit.point);
+                _moveClickFx.Stop();
+                _moveClickFx.transform.position = hit.point + new Vector3(0,0.1f,0);
+                _moveClickFx.Play();
             }
         }
     }

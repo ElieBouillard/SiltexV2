@@ -42,9 +42,19 @@ public class CameraController : MonoBehaviour
     private void Update()
     {
         if (_target == null) return;
+        
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            _isLocked = !_isLocked;
+        }
 
         Vector3 pos = transform.position;
-        
+
+        if (Input.GetKey(KeyCode.Space))
+        {
+            transform.position = _target.position + _offset;
+        }
+
         if (_isLocked)
         {
             pos = _target.position + _offset;
@@ -59,7 +69,7 @@ public class CameraController : MonoBehaviour
             }
             else if (cursorPosition.y <= screenBorderThickness)
             {
-                pos = transform.position - new Vector3(transform.forward.x, 0f, transform.forward.z * speed);
+                pos = transform.position - new Vector3(transform.forward.x, 0f, transform.forward.z) * speed;
             }
             if (cursorPosition.x >= Screen.width - screenBorderThickness)
             {
