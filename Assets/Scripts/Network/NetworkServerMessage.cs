@@ -46,7 +46,6 @@ public class NetworkServerMessage : MonoBehaviour
     #endregion
 
     #region Receive
-
     [MessageHandler((ushort) NetworkClientMessage.MessageId.startGame)]
     private static void OnClientStartGame(ushort id, Message message)
     {
