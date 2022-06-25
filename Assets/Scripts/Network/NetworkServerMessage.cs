@@ -34,13 +34,12 @@ public class NetworkServerMessage : MonoBehaviour
         NetworkManager.Instance.Server.SendToAll(message2);
     }
 
-    private static void ServerSendOnClientMovement(ushort id, Vector3 pos, float rotY, float speed)
+    private static void ServerSendOnClientMovement(ushort id, Vector3 pos, float rotY)
     {
         Message message = Message.Create(MessageSendMode.unreliable, MessageId.movement);
         message.AddUShort(id);
         message.AddVector3(pos);
         message.AddFloat(rotY);
-        message.AddFloat(speed);
         NetworkManager.Instance.Server.SendToAll(message, id);
     }
     #endregion
@@ -56,7 +55,7 @@ public class NetworkServerMessage : MonoBehaviour
     [MessageHandler((ushort) NetworkClientMessage.MessageId.movement)]
     private static void OnClientMovement(ushort id, Message message)
     {
-        ServerSendOnClientMovement(id, message.GetVector3(), message.GetFloat(), message.GetFloat());
+        ServerSendOnClientMovement(id, message.GetVector3(), message.GetFloat());
     }
     #endregion
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2953681333882633413}
   - component: {fileID: 2953681333882633411}
   - component: {fileID: 611036659719897490}
-  - component: {fileID: 2953681333882633410}
+  - component: {fileID: 7750127159736152416}
   m_Layer: 0
   m_Name: ClientPlayer
   m_TagString: Untagged
@@ -59,20 +59,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f57237aa6097cbb40bd49a1b4c6fe5be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!136 &2953681333882633410
-CapsuleCollider:
+--- !u!135 &7750127159736152416
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2953681333882633412}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
+  serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!1001 &1463723936071285941
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -80,6 +79,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2953681333882633413}
     m_Modifications:
+    - target: {fileID: 2615949683379136841, guid: 9cd4ac7f195522a4fa79d5baae0130ca, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2615949683379136842, guid: 9cd4ac7f195522a4fa79d5baae0130ca, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -128,7 +131,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerMesh
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2615949683379136841, guid: 9cd4ac7f195522a4fa79d5baae0130ca, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 9cd4ac7f195522a4fa79d5baae0130ca, type: 3}
 --- !u!4 &3467078241864914431 stripped
 Transform:

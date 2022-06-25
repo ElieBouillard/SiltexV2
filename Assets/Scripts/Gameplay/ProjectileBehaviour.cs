@@ -19,6 +19,7 @@ public class ProjectileBehaviour : MonoBehaviour
         {
             Vector3 normal = collision.contacts[0].normal;
             transform.forward = Vector3.Reflect(transform.forward, normal);
+            transform.forward = new Vector3(transform.forward.x, 0, transform.forward.z); 
         }
     }
 }

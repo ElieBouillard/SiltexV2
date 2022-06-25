@@ -9,9 +9,11 @@ public class PlayerFireController : MonoBehaviour
     [SerializeField] private Transform _launchPos;
     [SerializeField] private GameObject _projectile;
     [SerializeField] private LayerMask _floorMask;
+    [SerializeField] private GameObject _projectileMesh;
 
     private NavMeshAgent _agent;
 
+    private bool _canShoot = true;
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -19,42 +21,49 @@ public class PlayerFireController : MonoBehaviour
 
     private void Update()
     {
-        // Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
-        // if(Physics.Raycast(ray, ))
-
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.A) && _canShoot)
         {
-            Vector3? dir;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _floorMask))
             {
-                dir = (new Vector3(hit.point.x, 0, hit.point.z) - new Vector3(_launchPos.position.x, 0f, _launchPos.position.z)).normalized;
-                transform.forward = dir.Value;
-                
-                GetComponentInChildren<Animator>().SetTrigger("Attack");
-                
-                _agent.isStopped = true;
-                
-                Vector3 realPos = hit.point - Camera.main.transform.forward * _launchPos.transform.position.y;
+                Vector3? dir = (new Vector3(hit.point.x, 0, hit.point.z) - new Vector3(transform.position.x, 0f, transform.position.z)).normalized;
 
-                StartCoroutine(Shoot(realPos));
+                InitializeShoot(ray, dir.Value);
             }
         }
     }
 
-    private IEnumerator Shoot(Vector3 targetPos)
+    private void InitializeShoot(Ray ray, Vector3 dir)
+    {                
+        _agent.isStopped = true;
+                
+        transform.forward = dir;
+        
+        Shoot(ray);
+
+        _canShoot = false;
+        _projectileMesh.SetActive(false);
+        
+    }
+    
+    private void Shoot(Ray ray)
     {
-        yield return new WaitForSeconds(0.25f);
-        GameObject projectileInstance  = Instantiate(_projectile, _launchPos.position, Quaternion.identity);
-        projectileInstance.transform.forward = (new Vector3(targetPos.x, 0f,targetPos.z) - transform.position).normalized;
-        StartCoroutine(EndShoot());
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _floorMask))
+        {
+            GameObject projectileInstance  = Instantiate(_projectile, _launchPos.position, Quaternion.identity);
+            projectileInstance.transform.forward = (new Vector3(hit.point.x, 0f,hit.point.z) - new Vector3(transform.position.x, 0f, transform.position.z)).normalized;
+            StartCoroutine(EndShoot());
+        }
+        
     }
 
     private IEnumerator EndShoot()
     {
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(0.2f);
         _agent.isStopped = false;
+
+        _canShoot = true;
+        _projectileMesh.SetActive(true);
     }
 }
