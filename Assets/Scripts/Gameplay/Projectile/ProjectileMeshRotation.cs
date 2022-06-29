@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RotationTest : MonoBehaviour
+public class ProjectileMeshRotation : MonoBehaviour
 {
     private void Update()
     {

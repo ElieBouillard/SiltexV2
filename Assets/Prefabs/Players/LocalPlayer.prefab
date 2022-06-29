@@ -85,6 +85,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   _projectileMesh: {fileID: 5968157456702509202}
+  _initialCooldown: 3
 --- !u!195 &2953681333882633408
 NavMeshAgent:
   m_ObjectHideFlags: 0
