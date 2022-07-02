@@ -120,8 +120,6 @@ public class NetworkManager : MonoBehaviour
             Server.DisconnectClient(e.Client.Id);
             return;
         }
-        
-        ServerMessage.ServerSendOnClientConnected(e.Client.Id);
     }
 
     private void ServerOnClientDisconnected(object sender, ClientDisconnectedEventArgs e)
@@ -134,6 +132,11 @@ public class NetworkManager : MonoBehaviour
     private void ClientOnConnected(object sender, EventArgs e)
     {
         UiManager.Instance.SetLobbyPannel();
+
+        ulong steamId = new ushort();
+        if (UseSteam) steamId = (ulong)SteamUser.GetSteamID();
+        
+        ClientMessage.SendOnClientConnected(steamId);
     }
 
     private void ClientOnDisconnected(object sender, EventArgs e)
@@ -224,11 +227,17 @@ public class NetworkManager : MonoBehaviour
         if (Server.IsRunning) Server.Stop();
     }
 
-    public void AddPlayerToLobby(ushort id)
+    public void AddPlayerToLobby(ushort id, ulong steamId, int colorIndex)
     {
         GameObject playerInstance = Instantiate(_lobbyPlayerPrefab, _lobbySpawnPoints[Players.Count].position, Quaternion.identity);
         PlayerIdentity playerIdentity = playerInstance.GetComponent<PlayerIdentity>();
         playerIdentity.Id = id;
+
+        if (UseSteam)
+        {
+            playerIdentity.SteamId = steamId;
+            playerIdentity.SteamName = SteamFriends.GetFriendPersonaName((CSteamID) steamId);
+        }
 
         if (playerIdentity.Id == Client.Id)
         {
@@ -245,9 +254,19 @@ public class NetworkManager : MonoBehaviour
             }
         }
 
-        playerInstance.name = $"Player : {playerIdentity.Id}";
-        playerInstance.GetComponentInChildren<TMP_Text>().text = $"Player : {playerIdentity.Id}";
-
+        if (UseSteam)
+        {
+            playerInstance.name = playerIdentity.SteamName;
+            playerInstance.GetComponentInChildren<TMP_Text>().text = playerIdentity.SteamName;
+        }
+        else
+        {
+            playerInstance.name = $"Player : {playerIdentity.Id}";
+            playerInstance.GetComponentInChildren<TMP_Text>().text = $"Player : {playerIdentity.Id}";
+        }
+        
+        playerIdentity.ChangeColor(colorIndex);
+        
         Players.Add(playerIdentity.Id, playerIdentity);
     }
 
@@ -286,6 +305,8 @@ public class NetworkManager : MonoBehaviour
             
             playerIdentityTemp = playerTemp.GetComponent<PlayerIdentity>();
             playerIdentityTemp.Id = player.Key;
+            playerIdentityTemp.SteamId = player.Value.SteamId;
+            // playerIdentityTemp.ChangeColor(player.Value.ColorIndex);
 
             if (playerIdentityTemp.Id == Client.Id)
             {

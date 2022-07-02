@@ -2,13 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Steamworks;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
+using Color = System.Drawing.Color;
 
 public class PlayerIdentity : MonoBehaviour
 {
     public ushort Id;
+    public int ColorIndex = 0;
+    public ulong SteamId;
+    public string SteamName;
     public bool IsLocalPlayer { get; private set; }
+
+    private Renderer[] _renderers;
+    
+    private void Awake()
+    {
+        _renderers = GetComponentsInChildren<Renderer>();
+    }
 
     public void SetAsLocalPlayer()
     {
@@ -18,12 +31,24 @@ public class PlayerIdentity : MonoBehaviour
         CameraController.Instance.SetCameraTarget(gameObject.transform);
     }
 
-    public void ChangeColor(Color color)
+    public void ChangeColor(int colorIndex)
     {
-        Material[] mats = gameObject.GetComponentInChildren<Renderer>().materials;
-        foreach (var mat in mats)
+        ColorIndex = colorIndex;
+
+        for (int i = 0; i < _renderers.Length; i++)
         {
-            mat.color = color;
+            if (i == 0)
+            {
+                _renderers[i].materials[1].SetColor("_EmissionColor", NetworkColorsManager.Instance.Colors[colorIndex]);
+            }
+            
+            if (i == 1)
+            {
+                _renderers[i].materials[0].SetColor("_EmissionColor", NetworkColorsManager.Instance.Colors[colorIndex]);
+            }   
         }
+
+        if(!IsLocalPlayer) return;
+        ColorSelectionManager.Instance.ChangeImageColor(colorIndex);
     }
 }

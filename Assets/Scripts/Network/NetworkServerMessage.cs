@@ -9,6 +9,7 @@ public class NetworkServerMessage : MonoBehaviour
     internal enum  MessageId : ushort
     {
         playerConnected = 1,
+        changeColor,
         startGame,
         movement,
         shoot,
@@ -16,26 +17,38 @@ public class NetworkServerMessage : MonoBehaviour
     }
 
     #region Send
+    public static void ServerSendOnClientConnected(ushort playerConnectedId, ulong playerSteamId)
+    {
+        foreach (var item in NetworkManager.Instance.Players)
+        {
+            Message message1 = Message.Create(MessageSendMode.reliable, MessageId.playerConnected);
+            message1.AddUShort(item.Value.Id);
+            message1.AddULong(item.Value.SteamId);
+            message1.AddInt(item.Value.ColorIndex);
+            NetworkManager.Instance.Server.Send(message1, playerConnectedId);
+        }
+        
+        Message message2 = Message.Create(MessageSendMode.reliable, MessageId.playerConnected);
+        message2.AddUShort(playerConnectedId);
+        message2.AddULong(playerSteamId);
+        message2.AddInt(playerConnectedId);
+        NetworkManager.Instance.Server.SendToAll(message2);
+    }
+
+    public static void ServerSendOnClientChangedColor(ushort id, int colorIndex)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.changeColor);
+        message.AddUShort(id);
+        message.AddInt(colorIndex);
+        NetworkManager.Instance.Server.SendToAll(message, id);
+    }
+    
     private static void ServerSendOnClientStartGame()
     {
         Message message = Message.Create(MessageSendMode.reliable, MessageId.startGame);
         NetworkManager.Instance.Server.SendToAll(message);
     }
     
-    public void ServerSendOnClientConnected(ushort playerConnectedId)
-    {
-        foreach (var item in NetworkManager.Instance.Players)
-        {
-            Message message1 = Message.Create(MessageSendMode.reliable, MessageId.playerConnected);
-            message1.AddUShort(item.Value.Id);
-            NetworkManager.Instance.Server.Send(message1, playerConnectedId);
-        }
-        
-        Message message2 = Message.Create(MessageSendMode.reliable, MessageId.playerConnected);
-        message2.AddUShort(playerConnectedId);
-        NetworkManager.Instance.Server.SendToAll(message2);
-    }
-
     private static void ServerSendOnClientMovement(ushort id, Vector3 pos, float rotY)
     {
         Message message = Message.Create(MessageSendMode.unreliable, MessageId.movement);
@@ -64,6 +77,18 @@ public class NetworkServerMessage : MonoBehaviour
     #endregion
 
     #region Receive
+    [MessageHandler((ushort) NetworkClientMessage.MessageId.connected)]
+    private static void OnClientConnected(ushort id, Message message)
+    {
+        ServerSendOnClientConnected(id, message.GetULong());
+    }
+    
+    [MessageHandler((ushort) NetworkClientMessage.MessageId.changeColor)]
+    private static void OnClientChangeColor(ushort id, Message message)
+    {
+        ServerSendOnClientChangedColor(id, message.GetInt());
+    }
+    
     [MessageHandler((ushort) NetworkClientMessage.MessageId.startGame)]
     private static void OnClientStartGame(ushort id, Message message)
     {

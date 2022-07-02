@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using RiptideNetworking;
+using RiptideNetworking.Transports;
 using Steamworks;
 using UnityEngine;
 
@@ -8,13 +9,30 @@ public class NetworkClientMessage : MonoBehaviour
 {
     internal enum  MessageId : ushort
     {
-        startGame = 1,
+        connected = 1,
+        changeColor,
+        startGame,
         movement,
         shoot,
         shootReceived,
     }
 
     #region Send
+
+    public void SendOnClientConnected(ulong steamId)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.connected);
+        message.AddULong(steamId);
+        NetworkManager.Instance.Client.Send(message);
+    }
+
+    public void SendOnClientChangeColor(int colorIndex)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.changeColor);
+        message.AddInt(colorIndex);
+        NetworkManager.Instance.Client.Send(message);
+    }
+    
     public void SendOnStartGame()
     {
         Message message = Message.Create(MessageSendMode.reliable, MessageId.startGame);
@@ -51,9 +69,25 @@ public class NetworkClientMessage : MonoBehaviour
     [MessageHandler((ushort) NetworkServerMessage.MessageId.playerConnected)]
     private static void OnClientConnected(Message message)
     {
-        NetworkManager.Instance.AddPlayerToLobby(message.GetUShort());
+        NetworkManager.Instance.AddPlayerToLobby(message.GetUShort(), message.GetULong(), message.GetInt());
     }
 
+    [MessageHandler((ushort) NetworkServerMessage.MessageId.changeColor)]
+    private static void OnClientChangedColor(Message message)
+    {
+        ushort playerId = message.GetUShort();
+        int colorIndex = message.GetInt();
+        
+        foreach (var player in NetworkManager.Instance.Players)
+        {
+            if (player.Key == playerId)
+            {
+                player.Value.ChangeColor(colorIndex);
+                return;
+            }
+        }
+    }
+    
     [MessageHandler((ushort) NetworkServerMessage.MessageId.startGame)]
     private static void OnServerStartGame(Message message)
     {
@@ -91,8 +125,6 @@ public class NetworkClientMessage : MonoBehaviour
                 player.Value.GetComponent<PlayerClientFireController>().Shoot(playerId, shootId, pos, dir);
             }   
         }
-        
-        Debug.Log($"ShootReceived{shootId}");
     }
     
     [MessageHandler((ushort) NetworkServerMessage.MessageId.shootReceived)]
