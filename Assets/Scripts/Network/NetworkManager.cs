@@ -56,15 +56,16 @@ public class NetworkManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        DontDestroyOnLoad(gameObject);
 
         ClientMessage = gameObject.AddComponent<NetworkClientMessage>();
         ServerMessage = gameObject.AddComponent<NetworkServerMessage>();
 
-        DontDestroyOnLoad(gameObject);
-        
         SceneManager.sceneLoaded += OnClientChangeScene;
 
+        //InitializeSteam
         if (UseSteam) gameObject.AddComponent<SteamManager>();
+        GetComponent<SteamLobbyManager>().enabled = UseSteam;
     }
 
     private void Start()
@@ -79,12 +80,9 @@ public class NetworkManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        
-        
-        if(Client != null) Client.Tick();
+        Client.Tick();
 
-        if (!Server.IsRunning) return;
-        Server.Tick();
+        if (Server.IsRunning) Server.Tick();
     }
 
     private void OnApplicationQuit()
@@ -117,11 +115,11 @@ public class NetworkManager : MonoBehaviour
     #region Server
     private void ServerOnClientConnected(object sender, ServerClientConnectedEventArgs e)
     {
-        // if (_isRunningGame)
-        // {
-        //     Server.DisconnectClient(e.Client.Id);
-        //     return;
-        // }
+        if (_isRunningGame)
+        {
+            Server.DisconnectClient(e.Client.Id);
+            return;
+        }
     }
 
     private void ServerOnClientDisconnected(object sender, ClientDisconnectedEventArgs e)
@@ -191,6 +189,7 @@ public class NetworkManager : MonoBehaviour
         }
         else
         {
+            //Reorganize Lobby Placement
             int index = 0;
             foreach (var item in Players)
             {
@@ -284,7 +283,6 @@ public class NetworkManager : MonoBehaviour
         if (scene.name == "LobbyScene")
         {
             _lobbySpawnPoints = FindObjectsOfType<SpawnPoint>();
-            CheckForSteamLobby();
         }
         
         if (scene.name == "GameplayScene")
@@ -328,22 +326,6 @@ public class NetworkManager : MonoBehaviour
         
         Players.Clear();
         Players = playersTemp;
-    }
-    
-    private void CheckForSteamLobby()
-    {
-        SteamLobbyManager lobbyManager = FindObjectOfType<SteamLobbyManager>();
-        
-        if (lobbyManager == null) return;
-        
-        if (UseSteam)
-        {
-            lobbyManager.enabled = true;
-        }
-        else
-        {
-            lobbyManager.enabled = false;
-        }
     }
     #endregion
 

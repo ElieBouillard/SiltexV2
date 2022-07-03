@@ -25,6 +25,11 @@ public class InGameUiManager : MonoBehaviour
     
     [SerializeField] private GameObject _pausePannel;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private bool _isPause = false;
 
     private void Start()
