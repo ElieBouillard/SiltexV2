@@ -47,7 +47,7 @@ public class NetworkManager : MonoBehaviour
     [SerializeField] private GameObject _lobbyPlayerPrefab;
     [SerializeField] private GameObject _localPlayerPrefab;
     [SerializeField] private GameObject _clientPlayerPrefab;
-    [SerializeField] private Transform[] _lobbySpawnPoints;
+    [SerializeField] private SpawnPoint[] _lobbySpawnPoints;
     #endregion
 
     private bool _isRunningGame = false;
@@ -59,10 +59,12 @@ public class NetworkManager : MonoBehaviour
 
         ClientMessage = gameObject.AddComponent<NetworkClientMessage>();
         ServerMessage = gameObject.AddComponent<NetworkServerMessage>();
-        
-        CheckForSteamLobby();
-        
+
         DontDestroyOnLoad(gameObject);
+        
+        SceneManager.sceneLoaded += OnClientChangeScene;
+
+        if (UseSteam) gameObject.AddComponent<SteamManager>();
     }
 
     private void Start()
@@ -73,13 +75,13 @@ public class NetworkManager : MonoBehaviour
         
         EnableClient(steamServer);
         EnableServer(steamServer);
-
-        SceneManager.sceneLoaded += OnClientChangeScene;
     }
 
     private void FixedUpdate()
     {
-        Client.Tick();
+        
+        
+        if(Client != null) Client.Tick();
 
         if (!Server.IsRunning) return;
         Server.Tick();
@@ -115,11 +117,11 @@ public class NetworkManager : MonoBehaviour
     #region Server
     private void ServerOnClientConnected(object sender, ServerClientConnectedEventArgs e)
     {
-        if (_isRunningGame)
-        {
-            Server.DisconnectClient(e.Client.Id);
-            return;
-        }
+        // if (_isRunningGame)
+        // {
+        //     Server.DisconnectClient(e.Client.Id);
+        //     return;
+        // }
     }
 
     private void ServerOnClientDisconnected(object sender, ClientDisconnectedEventArgs e)
@@ -158,7 +160,7 @@ public class NetworkManager : MonoBehaviour
 
         _isRunningGame = false;
         
-        // if(UseSteam) SteamLobbyManager.Instance.LeaveLobby();
+        if(UseSteam) SteamLobbyManager.Instance.LeaveLobby();
     }
 
     private void ClientOnConnectionFailed(object sender, EventArgs e)
@@ -192,7 +194,7 @@ public class NetworkManager : MonoBehaviour
             int index = 0;
             foreach (var item in Players)
             {
-                item.Value.gameObject.transform.position = _lobbySpawnPoints[index].position;
+                item.Value.gameObject.transform.position = _lobbySpawnPoints[index].transform.position;
                 index++;
             }
         }
@@ -222,14 +224,15 @@ public class NetworkManager : MonoBehaviour
     public void LeaveGame()
     {
         Client.Disconnect();
-        ClientOnDisconnected(new object(), EventArgs.Empty);
 
-        if (Server.IsRunning) Server.Stop();
+        Server.Stop();
+
+        ClientOnDisconnected(new object(), EventArgs.Empty);
     }
 
     public void AddPlayerToLobby(ushort id, ulong steamId, int colorIndex)
     {
-        GameObject playerInstance = Instantiate(_lobbyPlayerPrefab, _lobbySpawnPoints[Players.Count].position, Quaternion.identity);
+        GameObject playerInstance = Instantiate(_lobbyPlayerPrefab, _lobbySpawnPoints[Players.Count].transform.position, Quaternion.identity);
         PlayerIdentity playerIdentity = playerInstance.GetComponent<PlayerIdentity>();
         playerIdentity.Id = id;
 
@@ -278,6 +281,12 @@ public class NetworkManager : MonoBehaviour
 
     private void OnClientChangeScene(Scene scene, LoadSceneMode loadSceneMode)
     {
+        if (scene.name == "LobbyScene")
+        {
+            _lobbySpawnPoints = FindObjectsOfType<SpawnPoint>();
+            CheckForSteamLobby();
+        }
+        
         if (scene.name == "GameplayScene")
         {
             InitializeGameplay();
@@ -306,7 +315,7 @@ public class NetworkManager : MonoBehaviour
             playerIdentityTemp = playerTemp.GetComponent<PlayerIdentity>();
             playerIdentityTemp.Id = player.Key;
             playerIdentityTemp.SteamId = player.Value.SteamId;
-            // playerIdentityTemp.ChangeColor(player.Value.ColorIndex);
+            playerIdentityTemp.ChangeColor(player.Value.ColorIndex);
 
             if (playerIdentityTemp.Id == Client.Id)
             {
@@ -329,7 +338,6 @@ public class NetworkManager : MonoBehaviour
         
         if (UseSteam)
         {
-            gameObject.AddComponent<SteamManager>();
             lobbyManager.enabled = true;
         }
         else

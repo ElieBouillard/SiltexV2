@@ -20,6 +20,7 @@ public class PlayerClientFireController : MonoBehaviour
 
         GameObject projectileInstance = Instantiate(_projectile, pos, Quaternion.identity);
         projectileInstance.transform.forward = dir;
+        projectileInstance.GetComponentInChildren<ProjectileMeshRotation>().ChangeColor(GetComponent<PlayerIdentity>().ColorIndex);
         
         NetworkManager.Instance.ClientMessage.SendShootReceived(playerId, shootId);
     }

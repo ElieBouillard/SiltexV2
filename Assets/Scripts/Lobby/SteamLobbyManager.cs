@@ -58,7 +58,7 @@ public class SteamLobbyManager : MonoBehaviour
             //Lobby Creation failed
             return;
         }
-
+        
         //Lobby creation succed
         
         lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
@@ -86,7 +86,6 @@ public class SteamLobbyManager : MonoBehaviour
         string hostAddress = SteamMatchmaking.GetLobbyData(lobbyId, HostAddressKey);
 
         NetworkManager.Instance.Client.Connect(hostAddress);
-        
     }
 
     public void LeaveLobby()

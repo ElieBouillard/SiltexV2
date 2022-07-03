@@ -81,6 +81,7 @@ public class PlayerLocalFireController : MonoBehaviour
         {
             GameObject projectileInstance  = Instantiate(_projectile, _launchPos.position, Quaternion.identity);
             projectileInstance.transform.forward = (new Vector3(hit.point.x, 0f,hit.point.z) - new Vector3(transform.position.x, 0f, transform.position.z)).normalized;
+            projectileInstance.GetComponentInChildren<ProjectileMeshRotation>().ChangeColor(transform.GetComponent<PlayerIdentity>().ColorIndex);
             StartCoroutine(EndShoot());
         }
     }
@@ -95,7 +96,7 @@ public class PlayerLocalFireController : MonoBehaviour
     private IEnumerator EndShoot2()
     {
         yield return new WaitForSeconds(_initialCooldown / 2);
-        _projectileMesh.transform.DOScale(1.2f, _initialCooldown / 2);
+        _projectileMesh.transform.DOScale(new Vector3(0.5f, 0.05f, 0.5f), _initialCooldown / 2);
     }
 
     public void ShootSended(int shootId)
