@@ -1,12 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using Steamworks;
-using TMPro;
-using UnityEditor;
 using UnityEngine;
-using Color = System.Drawing.Color;
 
 public class PlayerIdentity : MonoBehaviour
 {
@@ -35,18 +27,25 @@ public class PlayerIdentity : MonoBehaviour
     {
         ColorIndex = colorIndex;
 
+        Color color = NetworkColorsManager.Instance.Colors[colorIndex];
+        
         for (int i = 0; i < _renderers.Length; i++)
         {
             if (i == 0)
             {
-                _renderers[i].materials[1].SetColor("_EmissionColor", NetworkColorsManager.Instance.Colors[colorIndex]);
+                _renderers[i].materials[1].SetColor("_EmissionColor", color);
             }
             
             if (i == 1)
             {
-                _renderers[i].materials[0].SetColor("_EmissionColor", NetworkColorsManager.Instance.Colors[colorIndex]);
+                _renderers[i].materials[0].SetColor("_EmissionColor", color);
             }   
         }
+
+        // if (TryGetComponent<PlayerHealthController>(out PlayerHealthController healthController))
+        // {
+        //     healthController.HealthFillImage.color = color;
+        // }
 
         if(!IsLocalPlayer) return;
         ColorSelectionManager.Instance.ChangeImageColor(colorIndex);

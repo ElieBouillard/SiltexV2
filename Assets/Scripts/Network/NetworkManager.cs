@@ -47,7 +47,7 @@ public class NetworkManager : MonoBehaviour
     [SerializeField] private GameObject _lobbyPlayerPrefab;
     [SerializeField] private GameObject _localPlayerPrefab;
     [SerializeField] private GameObject _clientPlayerPrefab;
-    [SerializeField] private SpawnPoint[] _lobbySpawnPoints;
+    [SerializeField] private Transform[] _lobbySpawnPoints;
     #endregion
 
     private bool _isRunningGame = false;
@@ -282,7 +282,7 @@ public class NetworkManager : MonoBehaviour
     {
         if (scene.name == "LobbyScene")
         {
-            _lobbySpawnPoints = FindObjectsOfType<SpawnPoint>();
+            _lobbySpawnPoints = SpawnPointsManager.Instance.GetSpawnPoints();
         }
         
         if (scene.name == "GameplayScene")
