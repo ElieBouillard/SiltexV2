@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerIdentity : MonoBehaviour
@@ -42,12 +43,20 @@ public class PlayerIdentity : MonoBehaviour
             }   
         }
 
-        // if (TryGetComponent<PlayerHealthController>(out PlayerHealthController healthController))
-        // {
-        //     healthController.HealthFillImage.color = color;
-        // }
+        if (TryGetComponent<PlayerHealthController>(out PlayerHealthController healthController))
+        {
+            healthController.HealthFillImage.color = color;
+        }
 
         if(!IsLocalPlayer) return;
         ColorSelectionManager.Instance.ChangeImageColor(colorIndex);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (TryGetComponent<ProjectileBehaviour>(out ProjectileBehaviour projectile))
+        {
+            Debug.Log("uwu");
+        }
     }
 }

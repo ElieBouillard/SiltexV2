@@ -40,6 +40,6 @@ public class PlayerLocalMovementController : MonoBehaviour
     private void FixedUpdate()
     {
         if(NetworkManager.Instance == null) return;
-        NetworkManager.Instance.ClientMessage.SendOnMovement(transform.position, transform.GetChild(0).rotation.eulerAngles.y);
+        NetworkManager.Instance.ClientMessage.SendOnMovement(transform.position);
     }
 }

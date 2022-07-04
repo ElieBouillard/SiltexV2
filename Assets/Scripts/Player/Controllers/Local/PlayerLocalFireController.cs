@@ -13,6 +13,7 @@ public class PlayerLocalFireController : MonoBehaviour
     [SerializeField] private LayerMask _floorMask;
     [SerializeField] private GameObject _projectileMesh;
     [SerializeField] private float _initialCooldown;
+    [SerializeField] private float _stopTime;
 
     private NavMeshAgent _agent;
 
@@ -62,9 +63,7 @@ public class PlayerLocalFireController : MonoBehaviour
     private void InitializeShoot(Ray ray, Vector3 dir)
     {                
         _agent.isStopped = true;
-                
-        transform.forward = dir;
-        
+
         Shoot(ray);
 
         _canShoot = false;
@@ -81,22 +80,19 @@ public class PlayerLocalFireController : MonoBehaviour
         {
             GameObject projectileInstance  = Instantiate(_projectile, _launchPos.position, Quaternion.identity);
             projectileInstance.transform.forward = (new Vector3(hit.point.x, 0f,hit.point.z) - new Vector3(transform.position.x, 0f, transform.position.z)).normalized;
+            projectileInstance.GetComponent<ProjectileBehaviour>().PlayerId = GetComponent<PlayerIdentity>().Id;
             projectileInstance.GetComponentInChildren<ProjectileMeshRotation>().ChangeColor(transform.GetComponent<PlayerIdentity>().ColorIndex);
-            StartCoroutine(EndShoot());
+            StartCoroutine(Shoot());
         }
     }
 
-    private IEnumerator EndShoot()
+    private IEnumerator Shoot()
     {
-        StartCoroutine(EndShoot2());
-        yield return new WaitForSeconds(0.2f);
+        _projectileMesh.transform.DOKill();
+        _projectileMesh.transform.DOScale(new Vector3(0.5f, 0.05f, 0.5f), _initialCooldown / 2).SetDelay(_initialCooldown / 2f);
+        
+        yield return new WaitForSeconds(_stopTime);
         _agent.isStopped = false;
-    }
-
-    private IEnumerator EndShoot2()
-    {
-        yield return new WaitForSeconds(_initialCooldown / 2);
-        _projectileMesh.transform.DOScale(new Vector3(0.5f, 0.05f, 0.5f), _initialCooldown / 2);
     }
 
     public void ShootSended(int shootId)

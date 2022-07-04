@@ -1,8 +1,10 @@
 #if UNITY_EDITOR
 using System.ComponentModel;
+using System.Xml.Schema;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [InitializeOnLoad]
 public static class DefaultSceneLoader
@@ -16,7 +18,9 @@ public static class DefaultSceneLoader
             EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo ();
         }
 
-        if (state == PlayModeStateChange.EnteredPlayMode) {
+        if (state == PlayModeStateChange.EnteredPlayMode)
+        {
+
             EditorSceneManager.LoadScene (0);
         }
     }

@@ -102,6 +102,7 @@ GameObject:
   - component: {fileID: 2953681333882633411}
   - component: {fileID: 611036659719897490}
   - component: {fileID: 528858667855901240}
+  - component: {fileID: 4743053056056965186}
   - component: {fileID: 7750127159736152416}
   m_Layer: 0
   m_Name: ClientPlayer
@@ -168,6 +169,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _projectile: {fileID: 5481619318506860774, guid: c2106ee72988a6e47abd999e5dae4863, type: 3}
+  _projectileMesh: {fileID: 8786286306678112055}
+  _couldown: 1.5
+--- !u!114 &4743053056056965186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2953681333882633412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50e037ca648cdf748b6bc746220ddea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _initialHealth: 100
+  HealthFillImage: {fileID: 7878869690478489219}
 --- !u!135 &7750127159736152416
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -176,11 +193,11 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2953681333882633412}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Center: {x: 0, y: 0.25, z: 0}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &3158198053383845303
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,6 +510,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1d2255f125fc0b741a87493d1f0fcb31, type: 3}
+--- !u!1 &8786286306678112055 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6698803502918265378, guid: 1d2255f125fc0b741a87493d1f0fcb31, type: 3}
+  m_PrefabInstance: {fileID: 2673386189959501077}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8261000795866867085 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6322278617265320088, guid: 1d2255f125fc0b741a87493d1f0fcb31, type: 3}
