@@ -80,6 +80,8 @@ public class SteamLobbyManager : MonoBehaviour
 
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
+        ReceiveInvitePannel.Instance.EnablePannel(false);
+        
         if (NetworkManager.Instance.Server.IsRunning) return;
     
         lobbyId = new CSteamID(callback.m_ulSteamIDLobby);

@@ -51,12 +51,4 @@ public class PlayerIdentity : MonoBehaviour
         if(!IsLocalPlayer) return;
         ColorSelectionManager.Instance.ChangeImageColor(colorIndex);
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (TryGetComponent<ProjectileBehaviour>(out ProjectileBehaviour projectile))
-        {
-            Debug.Log("uwu");
-        }
-    }
 }
