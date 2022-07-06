@@ -31,6 +31,17 @@ public class PlayerHealthController : MonoBehaviour
         if (_currHealth <= 0) Death();
     }
 
+    public void Setlife(float life)
+    {
+        _currHealth = life;
+        HealthFillImage.fillAmount = _currHealth / _initialHealth;
+        if (_currHealth <= 0) Death();
+    }
+
+    public float GetLife()
+    {
+        return _currHealth;
+    }
     private void Death()
     {
         Debug.Log($"{gameObject.name} -> Death");

@@ -19,6 +19,8 @@ public class PlayerLocalMovementController : MonoBehaviour
 
     private void Update()
     {
+        if (!_agent.enabled) return;
+        
         if (Input.GetMouseButtonDown(1))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

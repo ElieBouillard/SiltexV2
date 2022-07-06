@@ -12,9 +12,12 @@ public class NetworkClientMessage : MonoBehaviour
         connected = 1,
         changeColor,
         startGame,
+        ready,
+        startRoundReceived,
         movement,
         shoot,
         shootReceived,
+        setLife,
     }
 
     #region Send
@@ -36,6 +39,18 @@ public class NetworkClientMessage : MonoBehaviour
     public void SendOnStartGame()
     {
         Message message = Message.Create(MessageSendMode.reliable, MessageId.startGame);
+        NetworkManager.Instance.Client.Send(message);
+    }
+
+    private static void SendOnStartRoundReceived()
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.startRoundReceived);
+        NetworkManager.Instance.Client.Send(message);
+    }
+    
+    public void SendOnReady()
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.ready);
         NetworkManager.Instance.Client.Send(message);
     }
 
@@ -62,6 +77,14 @@ public class NetworkClientMessage : MonoBehaviour
         message.AddInt(shootId);
         NetworkManager.Instance.Client.Send(message);
     }
+
+    public void SetLife(ushort playerHitId, float life)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.setLife);
+        message.AddUShort(playerHitId);
+        message.AddFloat(life);
+        NetworkManager.Instance.Client.Send(message);
+    }
     #endregion
 
     #region Receive
@@ -71,6 +94,12 @@ public class NetworkClientMessage : MonoBehaviour
         NetworkManager.Instance.AddPlayerToLobby(message.GetUShort(), message.GetULong(), message.GetInt());
     }
 
+    [MessageHandler((ushort) NetworkServerMessage.MessageId.cameraPos)]
+    private static void OnServerChangeCameraPos(Message message)
+    {
+        CameraController.Instance.SetCameraPos(message.GetInt());
+    }
+    
     [MessageHandler((ushort) NetworkServerMessage.MessageId.changeColor)]
     private static void OnClientChangedColor(Message message)
     {
@@ -93,6 +122,14 @@ public class NetworkClientMessage : MonoBehaviour
         NetworkManager.Instance.StartGame();
     }
     
+    
+    [MessageHandler((ushort) NetworkServerMessage.MessageId.startRound)]
+    private static void OnServerStartRound(Message message)
+    {
+        TimerRoundPannel.Instance.InitializeCouldown();
+        SendOnStartRoundReceived();
+    }
+    
     [MessageHandler((ushort) NetworkServerMessage.MessageId.movement)]
     private static void OnServerClientMovement(Message message)
     {
@@ -106,6 +143,14 @@ public class NetworkClientMessage : MonoBehaviour
                 player.Value.GetComponent<PlayerClientMovementController>().Move(pos);
             }
         }
+    }
+    
+    [MessageHandler((ushort) NetworkServerMessage.MessageId.teleport)]
+    private static void OnServerTeleportClient(Message message)
+    {
+        Vector3 pos = message.GetVector3();
+
+        NetworkManager.Instance.LocalPlayer.transform.position = pos;
     }
     
     [MessageHandler((ushort) NetworkServerMessage.MessageId.shoot)]
@@ -129,6 +174,24 @@ public class NetworkClientMessage : MonoBehaviour
     private static void OnServerClientShootReceived(Message message)
     {
         NetworkManager.Instance.LocalPlayer.GetComponent<PlayerLocalFireController>().ShootSended(message.GetInt());
+    }
+    
+    [MessageHandler((ushort) NetworkServerMessage.MessageId.setLife)]
+    private static void OnServerClientSetLife(Message message)
+    {
+        ushort playerHitId = message.GetUShort();
+        float life = message.GetFloat();
+        
+        Debug.Log(playerHitId);
+        Debug.Log(life);
+        
+        foreach (var player in NetworkManager.Instance.Players)
+        {
+            if (player.Key == playerHitId)
+            {
+                player.Value.GetComponent<PlayerHealthController>().Setlife(life);
+            }
+        }
     }
     #endregion
 }

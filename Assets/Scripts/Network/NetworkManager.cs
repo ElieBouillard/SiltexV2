@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using RiptideNetworking;
 using RiptideNetworking.Transports.SteamTransport;
 using RiptideNetworking.Utils;
@@ -8,6 +10,7 @@ using Steamworks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 using SteamClient = RiptideNetworking.Transports.SteamTransport.SteamClient;
 
 public class NetworkManager : MonoBehaviour
@@ -47,7 +50,7 @@ public class NetworkManager : MonoBehaviour
     [SerializeField] private GameObject _lobbyPlayerPrefab;
     [SerializeField] private GameObject _localPlayerPrefab;
     [SerializeField] private GameObject _clientPlayerPrefab;
-    [SerializeField] private Transform[] _lobbySpawnPoints;
+    [SerializeField] private Transform[] _spawnPoints;
     #endregion
 
     private bool _isRunningGame = false;
@@ -78,11 +81,14 @@ public class NetworkManager : MonoBehaviour
         EnableServer(steamServer);
     }
 
+    public bool SendStartRound;
     private void FixedUpdate()
     {
         Client.Tick();
 
         if (Server.IsRunning) Server.Tick();
+        
+        if(SendStartRound) ServerMessage.ServerSendStartRound();
     }
 
     private void OnApplicationQuit()
@@ -126,6 +132,71 @@ public class NetworkManager : MonoBehaviour
     {
         
     }
+    
+    private List<PlayerIdentity> _playersAlive = new List<PlayerIdentity>();
+    [SerializeField] private List<PlayerIdentity> _pool1 = new List<PlayerIdentity>(); 
+    [SerializeField] private List<PlayerIdentity> _pool2 = new List<PlayerIdentity>(); 
+    [ContextMenu("MakeBracket")]
+    private void ServerMakeBracket()
+    {
+        _pool1.Clear();
+        _pool2.Clear();
+
+        List<PlayerIdentity> playerToPick = new List<PlayerIdentity>();
+
+        for (int i = 0; i < _playersAlive.Count; i++)
+        {
+            playerToPick.Add(_playersAlive[i]);
+        }
+
+        int index = 0;
+        for (int i = 0; i < playerToPick.Count; i++)
+        {
+            int rand = Random.Range(0, playerToPick.Count);
+
+            if (index <= 1)
+            {
+                _pool1.Add(playerToPick[rand]);
+            }
+            else
+            {
+                _pool2.Add(playerToPick[rand]);
+            }
+
+            index++;
+            playerToPick.RemoveAt(rand);
+            i--;
+        }
+
+        ServerTeleportPlayers();
+    }
+    
+    private void ServerTeleportPlayers()
+    {
+        for (int i = 0; i < _pool1.Count; i++)
+        {
+            ServerMessage.ServerSendClientTeleport(_pool1[i].Id, _spawnPoints[i].position);
+            ServerMessage.ServerChangeCameraPos(_pool1[i].Id, 0);
+        }
+        
+        for (int i = 0; i < _pool2.Count; i++)
+        {
+            ServerMessage.ServerSendClientTeleport(_pool2[i].Id, _spawnPoints[i + 2].position);
+            ServerMessage.ServerChangeCameraPos(_pool2[i].Id, 1);
+        }
+    }
+
+    private int _playersReadyCount;
+    public void ServerReicevedPlayerReady()
+    {
+        _playersReadyCount++;
+        if (_playersReadyCount == Players.ToArray().Length)
+        {
+            SendStartRound = true;
+            _playersReadyCount = 0;
+        }
+    }
+    
     #endregion
 
     #region Client
@@ -141,6 +212,11 @@ public class NetworkManager : MonoBehaviour
 
     private void ClientOnDisconnected(object sender, EventArgs e)
     {
+        foreach (var item in Players)
+        {
+            Destroy(item.Value.gameObject); 
+        }
+        
         if (_isRunningGame)
         {
             SceneManager.LoadScene("LobbyScene");
@@ -150,14 +226,10 @@ public class NetworkManager : MonoBehaviour
             UiManager.Instance.SetConnectionPannel();
         }
 
-        foreach (var item in Players)
-        {
-           Destroy(item.Value.gameObject); 
-        }
         Players.Clear();
 
         _isRunningGame = false;
-        
+
         if(UseSteam) SteamLobbyManager.Instance.LeaveLobby();
     }
 
@@ -193,14 +265,14 @@ public class NetworkManager : MonoBehaviour
             int index = 0;
             foreach (var item in Players)
             {
-                item.Value.gameObject.transform.position = _lobbySpawnPoints[index].transform.position;
+                item.Value.gameObject.transform.position = _spawnPoints[index].transform.position;
                 index++;
             }
         }
     }
     #endregion
 
-    #region Functions
+    #region ClientFunctions
     public void StartHost()
     {
         if (UseSteam)
@@ -231,7 +303,7 @@ public class NetworkManager : MonoBehaviour
 
     public void AddPlayerToLobby(ushort id, ulong steamId, int colorIndex)
     {
-        GameObject playerInstance = Instantiate(_lobbyPlayerPrefab, _lobbySpawnPoints[Players.Count].transform.position, Quaternion.identity);
+        GameObject playerInstance = Instantiate(_lobbyPlayerPrefab, _spawnPoints[Players.Count].transform.position, Quaternion.identity);
         PlayerIdentity playerIdentity = playerInstance.GetComponent<PlayerIdentity>();
         playerIdentity.Id = id;
 
@@ -282,16 +354,17 @@ public class NetworkManager : MonoBehaviour
     {
         if (scene.name == "LobbyScene")
         {
-            _lobbySpawnPoints = SpawnPointsManager.Instance.GetSpawnPoints();
+            _spawnPoints = SpawnPointsManager.Instance.GetSpawnPoints();
         }
         
         if (scene.name == "GameplayScene")
         {
-            InitializeGameplay();
+            _spawnPoints = SpawnPointsManager.Instance.GetSpawnPoints();
+            SpawnPlayersInGameplay();
         }
     }
 
-    private void InitializeGameplay()
+    private void SpawnPlayersInGameplay()
     {
         Dictionary<ushort, PlayerIdentity> playersTemp = new Dictionary<ushort, PlayerIdentity>();
         foreach (var player in Players)
@@ -326,6 +399,17 @@ public class NetworkManager : MonoBehaviour
         
         Players.Clear();
         Players = playersTemp;
+
+        _playersAlive.Clear();
+        foreach (var player in Players)
+        {
+            _playersAlive.Add(player.Value);
+        }
+        
+        ClientMessage.SendOnReady();
+        
+        if (!Server.IsRunning) return;
+        ServerMakeBracket(); 
     }
     #endregion
 

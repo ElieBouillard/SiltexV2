@@ -32,12 +32,21 @@ public class ProjectileBehaviour : MonoBehaviour
             transform.DOScale(Vector3.zero, 0.2f);
             Destroy(gameObject, 0.5f);
         }
-            
+        
+        
         if (collision.collider.TryGetComponent<PlayerHealthController>(out PlayerHealthController playerHealth))
         {
-            if (playerHealth.GetComponent<PlayerIdentity>().Id != PlayerId)
+            PlayerIdentity playerHit = playerHealth.GetComponent<PlayerIdentity>();
+            
+            if (playerHit.Id != PlayerId)
             {
                 playerHealth.TakeDamage(20f);
+
+                if (PlayerId == NetworkManager.Instance.Client.Id)
+                {
+                    NetworkManager.Instance.ClientMessage.SetLife(playerHit.Id, playerHealth.GetLife());
+                }
+
                 Destroy(gameObject);
                 PlayFx();
             }

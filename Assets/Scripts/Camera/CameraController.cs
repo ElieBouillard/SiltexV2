@@ -31,6 +31,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float screenBorderThickness = 10f;
     [SerializeField] private Vector2 screenXLimits = Vector2.zero;
     [SerializeField] private Vector2 screenZLimits = Vector2.zero;
+
+    [SerializeField] private Transform[] _cameraPoints;
     
     public bool _isLocked = false;
 
@@ -82,6 +84,11 @@ public class CameraController : MonoBehaviour
         } 
         
         transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * lerpSpeed); 
+    }
+
+    public void SetCameraPos(int index)
+    {
+        _target = _cameraPoints[index];
     }
     
     public void SetCameraTarget(Transform target)

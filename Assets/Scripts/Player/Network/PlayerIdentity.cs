@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerIdentity : MonoBehaviour
 {
@@ -9,19 +10,31 @@ public class PlayerIdentity : MonoBehaviour
     public string SteamName;
     public bool IsLocalPlayer { get; private set; }
 
+    private NavMeshAgent _agent;
+    private PlayerLocalMovementController _movementController;
+    private PlayerLocalFireController _fireController;
     private Renderer[] _renderers;
     
     private void Awake()
     {
+        _agent = GetComponent<NavMeshAgent>();
+        _movementController = GetComponent<PlayerLocalMovementController>();
+        _fireController = GetComponent<PlayerLocalFireController>();
         _renderers = GetComponentsInChildren<Renderer>();
     }
 
+    public void Initialize(bool value)
+    {
+        _agent.enabled = value;
+        _fireController.enabled = value;
+    }
+    
     public void SetAsLocalPlayer()
     {
         IsLocalPlayer = true;
         
-        if(CameraController.Instance == null) return;
-        CameraController.Instance.SetCameraTarget(gameObject.transform);
+        // if(CameraController.Instance == null) return;
+        // CameraController.Instance.SetCameraTarget(gameObject.transform);
     }
 
     public void ChangeColor(int colorIndex)

@@ -17,7 +17,8 @@ public class PlayerClientFireController : MonoBehaviour
         {
             if (_shootReceived[i].ShootId == shootId) return;
         }
-        
+
+        _projectileMesh.transform.DOKill();
         _projectileMesh.transform.localScale = Vector3.zero;
         
         Shoot shoot = new Shoot(shootId, pos, dir);

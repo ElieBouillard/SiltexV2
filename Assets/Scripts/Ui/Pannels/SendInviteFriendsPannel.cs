@@ -28,7 +28,7 @@ public class SendInviteFriendsPannel : Pannel
 
     private void OnClickRefreshButton()
     {
-        int friendCount = _content.GetChildCount();
+        int friendCount = _content.childCount;
 
         for (int i = 0; i < friendCount; i++)
         {

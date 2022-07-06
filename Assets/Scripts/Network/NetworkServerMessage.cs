@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using RiptideNetworking;
 using Steamworks;
 using UnityEngine;
@@ -9,11 +10,15 @@ public class NetworkServerMessage : MonoBehaviour
     internal enum  MessageId : ushort
     {
         playerConnected = 1,
+        cameraPos,
         changeColor,
         startGame,
+        startRound,
         movement,
+        teleport,
         shoot,
         shootReceived,
+        setLife,
     }
 
     #region Send
@@ -35,6 +40,13 @@ public class NetworkServerMessage : MonoBehaviour
         NetworkManager.Instance.Server.SendToAll(message2);
     }
 
+    public void ServerChangeCameraPos(ushort id, int posIndex)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.cameraPos);
+        message.Add(posIndex);
+        NetworkManager.Instance.Server.Send(message, id);
+    }
+    
     public static void ServerSendOnClientChangedColor(ushort id, int colorIndex)
     {
         Message message = Message.Create(MessageSendMode.reliable, MessageId.changeColor);
@@ -42,10 +54,16 @@ public class NetworkServerMessage : MonoBehaviour
         message.AddInt(colorIndex);
         NetworkManager.Instance.Server.SendToAll(message, id);
     }
-    
+
     private static void ServerSendOnClientStartGame()
     {
         Message message = Message.Create(MessageSendMode.reliable, MessageId.startGame);
+        NetworkManager.Instance.Server.SendToAll(message);
+    }
+
+    public void ServerSendStartRound()
+    {
+        Message message = Message.Create(MessageSendMode.unreliable, MessageId.startRound);
         NetworkManager.Instance.Server.SendToAll(message);
     }
     
@@ -55,6 +73,13 @@ public class NetworkServerMessage : MonoBehaviour
         message.AddUShort(id);
         message.AddVector3(pos);
         NetworkManager.Instance.Server.SendToAll(message, id);
+    }
+
+    public void ServerSendClientTeleport(ushort id, Vector3 pos)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.teleport);
+        message.AddVector3(pos);
+        NetworkManager.Instance.Server.Send(message, id);
     }
 
     private static void ServerSendOnClientShoot(ushort id, int shootId, Vector3 pos, Vector3 dir)
@@ -72,6 +97,14 @@ public class NetworkServerMessage : MonoBehaviour
         Message message = Message.Create(MessageSendMode.reliable, MessageId.shootReceived);
         message.AddInt(shootId);
         NetworkManager.Instance.Server.Send(message, playerId);
+    }
+    
+    private static void ServerSendOnClientSetLife(ushort playerId, ushort playerHitId, float life)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.setLife);
+        message.AddUShort(playerHitId);
+        message.AddFloat(life);
+        NetworkManager.Instance.Server.SendToAll(message, playerId);
     }
     #endregion
 
@@ -95,6 +128,25 @@ public class NetworkServerMessage : MonoBehaviour
         ServerSendOnClientStartGame();
     }
 
+    [MessageHandler((ushort) NetworkClientMessage.MessageId.ready)]
+    private static void OnClientReady(ushort id, Message message)
+    {
+        NetworkManager.Instance.ServerReicevedPlayerReady();
+    }
+
+    private static int startRoundReceivedCout = 0;
+    [MessageHandler((ushort) NetworkClientMessage.MessageId.startRoundReceived)]
+    private static void OnClientStartRoundReceived(ushort id, Message message)
+    {
+        startRoundReceivedCout++;
+
+        if (startRoundReceivedCout == NetworkManager.Instance.Players.ToArray().Length)
+        {
+            NetworkManager.Instance.SendStartRound = false;
+            startRoundReceivedCout = 0;
+        }
+    }
+    
     [MessageHandler((ushort) NetworkClientMessage.MessageId.movement)]
     private static void OnClientMovement(ushort id, Message message)
     {
@@ -111,6 +163,12 @@ public class NetworkServerMessage : MonoBehaviour
     private static void OnClientShootReceived(ushort id, Message message)
     {
         ServerSendOnClientShootReceived(message.GetUShort(), message.GetInt());
+    }
+    
+    [MessageHandler((ushort) NetworkClientMessage.MessageId.setLife)]
+    private static void OnClientSetLife(ushort id, Message message)
+    {
+        ServerSendOnClientSetLife(id, message.GetUShort(), message.GetFloat());
     }
     #endregion
 }
