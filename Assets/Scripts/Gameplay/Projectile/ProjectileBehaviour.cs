@@ -7,6 +7,7 @@ public class ProjectileBehaviour : MonoBehaviour
     [SerializeField] private float _movementSpeed = 2f;
     public int PlayerId;
     [SerializeField] private ParticleSystem _particleSystem;
+    [SerializeField] private float _damage = 20f;
 
     private void Update()
     {
@@ -38,13 +39,16 @@ public class ProjectileBehaviour : MonoBehaviour
         {
             PlayerIdentity playerHit = playerHealth.GetComponent<PlayerIdentity>();
             
+            
             if (playerHit.Id != PlayerId)
             {
-                playerHealth.TakeDamage(20f);
+                float newHealth = playerHealth.GetLife() - _damage;
+                Debug.Log($"NewHealth{newHealth}");
 
                 if (PlayerId == NetworkManager.Instance.Client.Id)
                 {
-                    NetworkManager.Instance.ClientMessage.SetLife(playerHit.Id, playerHealth.GetLife());
+                    playerHealth.Setlife(newHealth);
+                    NetworkManager.Instance.ClientMessage.SetLife(playerHit.Id, newHealth);
                 }
 
                 Destroy(gameObject);

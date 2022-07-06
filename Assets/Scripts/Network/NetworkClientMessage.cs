@@ -182,8 +182,7 @@ public class NetworkClientMessage : MonoBehaviour
         ushort playerHitId = message.GetUShort();
         float life = message.GetFloat();
         
-        Debug.Log(playerHitId);
-        Debug.Log(life);
+        Debug.Log($"ServerSetLife->PlayerId{playerHitId}:Life{life}");
         
         foreach (var player in NetworkManager.Instance.Players)
         {

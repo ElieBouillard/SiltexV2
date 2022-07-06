@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class PlayerHealthController : MonoBehaviour
 {
+    [SerializeField] private ParticleSystem _deathParticleSystem;
     [SerializeField] private float _initialHealth = 100f;
 
     public Image HealthFillImage;
@@ -24,13 +25,6 @@ public class PlayerHealthController : MonoBehaviour
         HealthFillImage.fillAmount = 1;
     }
     
-    public void TakeDamage(float damage)
-    {
-        _currHealth -= damage;
-        HealthFillImage.fillAmount = _currHealth / _initialHealth;
-        if (_currHealth <= 0) Death();
-    }
-
     public void Setlife(float life)
     {
         _currHealth = life;
@@ -42,8 +36,8 @@ public class PlayerHealthController : MonoBehaviour
     {
         return _currHealth;
     }
-    private void Death()
+    public virtual void Death()
     {
-        Debug.Log($"{gameObject.name} -> Death");
+        _deathParticleSystem.Play();
     }
 }

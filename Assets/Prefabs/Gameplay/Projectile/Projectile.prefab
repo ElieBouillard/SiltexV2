@@ -14464,6 +14464,7 @@ MonoBehaviour:
   _movementSpeed: 10
   PlayerId: 0
   _particleSystem: {fileID: 6008677585863608253}
+  _damage: 50
 --- !u!54 &9213713731815707050
 Rigidbody:
   m_ObjectHideFlags: 0

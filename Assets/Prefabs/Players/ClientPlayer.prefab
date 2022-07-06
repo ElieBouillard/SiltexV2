@@ -125,6 +125,7 @@ Transform:
   - {fileID: 5897039876495978100}
   - {fileID: 8261000795866867085}
   - {fileID: 2726331749047134750}
+  - {fileID: 2641741854616454951}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -183,6 +184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50e037ca648cdf748b6bc746220ddea7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _deathParticleSystem: {fileID: 2767424760028128485}
   _initialHealth: 100
   HealthFillImage: {fileID: 7878869690478489219}
 --- !u!135 &7750127159736152416
@@ -452,6 +454,41 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 5009779236489712321, guid: 9cd4ac7f195522a4fa79d5baae0130ca, type: 3}
   m_PrefabInstance: {fileID: 1463723936071285941}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2640890401844587733
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 2953681333882633413}
+    m_Modifications:
+    - target: {fileID: 1095767987829304, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+      propertyPath: m_Name
+      value: SmokeCircleBright
+      objectReference: {fileID: 0}
+    - target: {fileID: 4233035815676914, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 198939326377560188, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 198975644310091912, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+--- !u!4 &2641741854616454951 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4233035815676914, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+  m_PrefabInstance: {fileID: 2640890401844587733}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2767424760028128485 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 198595972869621808, guid: bbdffbb5bb33e0942a03dd0c4a2b87f4, type: 3}
+  m_PrefabInstance: {fileID: 2640890401844587733}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2673386189959501077
 PrefabInstance:

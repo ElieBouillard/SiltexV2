@@ -4,5 +4,9 @@ using UnityEngine;
 
 public class PlayerLocalHealthController : PlayerHealthController
 {
-
+    public override void Death()
+    {
+        base.Death();
+        GetComponent<PlayerIdentity>().Initialize(false);
+    }
 }
