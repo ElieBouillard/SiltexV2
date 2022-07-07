@@ -134,8 +134,8 @@ public class NetworkManager : MonoBehaviour
     }
     
     private List<PlayerIdentity> _playersAlive = new List<PlayerIdentity>();
-    [SerializeField] private List<PlayerIdentity> _pool1 = new List<PlayerIdentity>(); 
-    [SerializeField] private List<PlayerIdentity> _pool2 = new List<PlayerIdentity>(); 
+    [SerializeField] private List<ushort> _pool1 = new List<ushort>(); 
+    [SerializeField] private List<ushort> _pool2 = new List<ushort>(); 
     [ContextMenu("MakeBracket")]
     private void ServerMakeBracket()
     {
@@ -156,11 +156,11 @@ public class NetworkManager : MonoBehaviour
 
             if (index <= 1)
             {
-                _pool1.Add(playerToPick[rand]);
+                _pool1.Add(playerToPick[rand].Id);
             }
             else
             {
-                _pool2.Add(playerToPick[rand]);
+                _pool2.Add(playerToPick[rand].Id);
             }
 
             index++;
@@ -175,14 +175,14 @@ public class NetworkManager : MonoBehaviour
     {
         for (int i = 0; i < _pool1.Count; i++)
         {
-            ServerMessage.ServerSendClientTeleport(_pool1[i].Id, _spawnPoints[i].position);
-            ServerMessage.ServerChangeCameraPos(_pool1[i].Id, 0);
+            ServerMessage.ServerSendClientTeleport(_pool1[i], _spawnPoints[i].position);
+            ServerMessage.ServerChangeCameraPos(_pool1[i], 0);
         }
         
         for (int i = 0; i < _pool2.Count; i++)
         {
-            ServerMessage.ServerSendClientTeleport(_pool2[i].Id, _spawnPoints[i + 2].position);
-            ServerMessage.ServerChangeCameraPos(_pool2[i].Id, 1);
+            ServerMessage.ServerSendClientTeleport(_pool2[i], _spawnPoints[i + 2].position);
+            ServerMessage.ServerChangeCameraPos(_pool2[i], 1);
         }
     }
 
@@ -196,7 +196,34 @@ public class NetworkManager : MonoBehaviour
             _playersReadyCount = 0;
         }
     }
-    
+
+    public void OnClientDeath(ushort id)
+    {
+        ServerMessage.ServerSendOnRoundEnd(id, false);
+
+        if (_pool1.Contains(id))
+        {
+            for (int i = 0; i < _pool1.Count; i++)
+            {
+                if (_pool1[i] != id)
+                {
+                    ServerMessage.ServerSendOnRoundEnd(_pool1[i], true);
+                }
+            }
+        }
+        
+        if (_pool2.Contains(id))
+        {
+            for (int i = 0; i < _pool2.Count; i++)
+            {
+                if (_pool2[i] != id)
+                {
+                    ServerMessage.ServerSendOnRoundEnd(_pool2[i], true);
+                }
+            }
+        }
+
+    }
     #endregion
 
     #region Client

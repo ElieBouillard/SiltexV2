@@ -19,6 +19,7 @@ public class NetworkServerMessage : MonoBehaviour
         shoot,
         shootReceived,
         setLife,
+        endRound,
     }
 
     #region Send
@@ -106,6 +107,13 @@ public class NetworkServerMessage : MonoBehaviour
         message.AddFloat(life);
         NetworkManager.Instance.Server.SendToAll(message, playerId);
     }
+
+    public void ServerSendOnRoundEnd(ushort playerId, bool isWin)
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.endRound);
+        message.AddBool(isWin);
+        NetworkManager.Instance.Server.Send(message, playerId);
+    }
     #endregion
 
     #region Receive
@@ -169,6 +177,12 @@ public class NetworkServerMessage : MonoBehaviour
     private static void OnClientSetLife(ushort id, Message message)
     {
         ServerSendOnClientSetLife(id, message.GetUShort(), message.GetFloat());
+    }
+    
+    [MessageHandler((ushort) NetworkClientMessage.MessageId.death)]
+    private static void OnClientDeath(ushort id, Message message)
+    {
+        NetworkManager.Instance.OnClientDeath(id);
     }
     #endregion
 }

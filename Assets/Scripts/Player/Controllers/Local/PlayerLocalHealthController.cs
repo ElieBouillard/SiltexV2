@@ -8,5 +8,6 @@ public class PlayerLocalHealthController : PlayerHealthController
     {
         base.Death();
         GetComponent<PlayerIdentity>().Initialize(false);
+        NetworkManager.Instance.ClientMessage.SendOnDeath();
     }
 }

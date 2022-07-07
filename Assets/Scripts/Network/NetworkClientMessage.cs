@@ -18,6 +18,7 @@ public class NetworkClientMessage : MonoBehaviour
         shoot,
         shootReceived,
         setLife,
+        death,
     }
 
     #region Send
@@ -83,6 +84,12 @@ public class NetworkClientMessage : MonoBehaviour
         Message message = Message.Create(MessageSendMode.reliable, MessageId.setLife);
         message.AddUShort(playerHitId);
         message.AddFloat(life);
+        NetworkManager.Instance.Client.Send(message);
+    }
+
+    public void SendOnDeath()
+    {
+        Message message = Message.Create(MessageSendMode.reliable, MessageId.death);
         NetworkManager.Instance.Client.Send(message);
     }
     #endregion
@@ -191,6 +198,14 @@ public class NetworkClientMessage : MonoBehaviour
                 player.Value.GetComponent<PlayerHealthController>().Setlife(life);
             }
         }
+    }
+    
+    [MessageHandler((ushort) NetworkServerMessage.MessageId.endRound)]
+    private static void OnServerEndRound(Message message)
+    {
+        bool isWin = message.GetBool();
+        Debug.Log(isWin);
+        EndRoundPannel.Instance.Enable(true,isWin);
     }
     #endregion
 }
