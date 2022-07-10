@@ -43,7 +43,6 @@ public class ProjectileBehaviour : MonoBehaviour
             if (playerHit.Id != PlayerId)
             {
                 float newHealth = playerHealth.GetLife() - _damage;
-                Debug.Log($"NewHealth{newHealth}");
 
                 if (PlayerId == NetworkManager.Instance.Client.Id)
                 {

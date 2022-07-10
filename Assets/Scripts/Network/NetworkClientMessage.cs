@@ -49,7 +49,7 @@ public class NetworkClientMessage : MonoBehaviour
         NetworkManager.Instance.Client.Send(message);
     }
     
-    public void SendOnReady()
+    public static void SendOnReady()
     {
         Message message = Message.Create(MessageSendMode.reliable, MessageId.ready);
         NetworkManager.Instance.Client.Send(message);
@@ -157,6 +157,8 @@ public class NetworkClientMessage : MonoBehaviour
     {
         Vector3 pos = message.GetVector3();
 
+        SendOnReady();
+        
         NetworkManager.Instance.LocalPlayer.transform.position = pos;
     }
     
@@ -188,9 +190,7 @@ public class NetworkClientMessage : MonoBehaviour
     {
         ushort playerHitId = message.GetUShort();
         float life = message.GetFloat();
-        
-        Debug.Log($"ServerSetLife->PlayerId{playerHitId}:Life{life}");
-        
+
         foreach (var player in NetworkManager.Instance.Players)
         {
             if (player.Key == playerHitId)
@@ -204,8 +204,8 @@ public class NetworkClientMessage : MonoBehaviour
     private static void OnServerEndRound(Message message)
     {
         bool isWin = message.GetBool();
-        Debug.Log(isWin);
         EndRoundPannel.Instance.Enable(true,isWin);
+        if(isWin) NetworkManager.Instance.LocalPlayer.Initialize(false);
     }
     #endregion
 }

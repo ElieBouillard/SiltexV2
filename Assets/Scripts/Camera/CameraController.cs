@@ -85,7 +85,7 @@ public class CameraController : MonoBehaviour
         
         transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * lerpSpeed); 
     }
-
+    
     public void SetCameraPos(int index)
     {
         _target = _cameraPoints[index];

@@ -25,12 +25,22 @@ public class EndRoundPannel : MonoBehaviour
         if (isWin)
         {
             _text.text = "VICTORY !";
+            _text.color = Color.green;
         }
         else
         {
+            _text.color = Color.red;
             _text.text = "DEFEAT !";
         }
         
         _text.gameObject.SetActive(active);
+
+        if (active) StartCoroutine(DisableText());
+    }
+
+    IEnumerator DisableText()
+    {
+        yield return new WaitForSeconds(2f);
+        _text.gameObject.SetActive(false);
     }
 }

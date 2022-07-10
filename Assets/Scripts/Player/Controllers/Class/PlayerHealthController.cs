@@ -39,5 +39,7 @@ public class PlayerHealthController : MonoBehaviour
     public virtual void Death()
     {
         _deathParticleSystem.Play();
+        _deathParticleSystem.transform.parent = null;
+        gameObject.SetActive(false);
     }
 }

@@ -14461,10 +14461,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9114bd2d9594f7e4ebe95bfd54cf7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _movementSpeed: 10
+  _movementSpeed: 15
   PlayerId: 0
   _particleSystem: {fileID: 6008677585863608253}
-  _damage: 50
+  _damage: 20
 --- !u!54 &9213713731815707050
 Rigidbody:
   m_ObjectHideFlags: 0

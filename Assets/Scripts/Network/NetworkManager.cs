@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -133,7 +134,7 @@ public class NetworkManager : MonoBehaviour
         
     }
     
-    private List<PlayerIdentity> _playersAlive = new List<PlayerIdentity>();
+    [SerializeField] private List<PlayerIdentity> _playersAlive = new List<PlayerIdentity>();
     [SerializeField] private List<ushort> _pool1 = new List<ushort>(); 
     [SerializeField] private List<ushort> _pool2 = new List<ushort>(); 
     [ContextMenu("MakeBracket")]
@@ -186,15 +187,21 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    private int _playersReadyCount;
+    [SerializeField] private int _playersReadyCount;
     public void ServerReicevedPlayerReady()
     {
         _playersReadyCount++;
-        if (_playersReadyCount == Players.ToArray().Length)
+        if (_playersReadyCount == _playersAlive.Count)
         {
-            SendStartRound = true;
+            StartCoroutine(DelayStartRound());
             _playersReadyCount = 0;
         }
+    }
+
+    IEnumerator DelayStartRound()
+    {
+        yield return new WaitForSeconds(2.5f);
+        SendStartRound = true;
     }
 
     public void OnClientDeath(ushort id)
@@ -209,9 +216,13 @@ public class NetworkManager : MonoBehaviour
                 {
                     ServerMessage.ServerSendOnRoundEnd(_pool1[i], true);
                 }
+                
+                ServerMessage.ServerChangeCameraPos(_pool1[i], 1);
             }
+
+            _pool1.Clear();
         }
-        
+
         if (_pool2.Contains(id))
         {
             for (int i = 0; i < _pool2.Count; i++)
@@ -220,9 +231,29 @@ public class NetworkManager : MonoBehaviour
                 {
                     ServerMessage.ServerSendOnRoundEnd(_pool2[i], true);
                 }
+                ServerMessage.ServerChangeCameraPos(_pool2[i], 0);
+            }
+            _pool2.Clear();
+        }
+
+        for (int i = 0; i < _playersAlive.Count; i++)
+        {
+            if (_playersAlive[i].Id == id)
+            {
+                _playersAlive.RemoveAt(i);
+                break;
             }
         }
 
+        if (_playersAlive.Count == 2)
+        {
+            foreach (var player in Players)
+            {
+                ServerMessage.ServerChangeCameraPos(player.Key, 0);
+            }
+            
+            ServerMakeBracket();
+        }
     }
     #endregion
 
@@ -432,9 +463,7 @@ public class NetworkManager : MonoBehaviour
         {
             _playersAlive.Add(player.Value);
         }
-        
-        ClientMessage.SendOnReady();
-        
+
         if (!Server.IsRunning) return;
         ServerMakeBracket(); 
     }

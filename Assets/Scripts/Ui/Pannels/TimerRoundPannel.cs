@@ -43,6 +43,11 @@ public class TimerRoundPannel : MonoBehaviour
         _timerText.text = "3";
 
         _timer = 3f;
+
+        foreach (var player in NetworkManager.Instance.Players)
+        {
+            player.Value.GetComponent<PlayerProfileController>().EnableProfile(true);
+        }
     }
     
     private void Update()
@@ -64,6 +69,11 @@ public class TimerRoundPannel : MonoBehaviour
     {
         _timerText.gameObject.SetActive(false);
         _timerImage.gameObject.SetActive(false);
+        
+        foreach (var player in NetworkManager.Instance.Players)
+        {
+            player.Value.GetComponent<PlayerProfileController>().EnableProfile(false);
+        }
         
         NetworkManager.Instance.LocalPlayer.Initialize(true);
     }

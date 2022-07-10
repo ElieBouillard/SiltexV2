@@ -13,6 +13,7 @@ public class PlayerIdentity : MonoBehaviour
     private NavMeshAgent _agent;
     private PlayerLocalMovementController _movementController;
     private PlayerLocalFireController _fireController;
+    private PlayerHealthController _healthController;
     private Renderer[] _renderers;
     
     private void Awake()
@@ -20,6 +21,7 @@ public class PlayerIdentity : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _movementController = GetComponent<PlayerLocalMovementController>();
         _fireController = GetComponent<PlayerLocalFireController>();
+        _healthController = GetComponent<PlayerHealthController>();
         _renderers = GetComponentsInChildren<Renderer>();
     }
 
@@ -27,6 +29,9 @@ public class PlayerIdentity : MonoBehaviour
     {
         _agent.enabled = value;
         _fireController.enabled = value;
+        _healthController.enabled = value;
+        
+        if(value) _healthController.InitializeHealth();
     }
     
     public void SetAsLocalPlayer()
